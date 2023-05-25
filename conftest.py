@@ -1,8 +1,11 @@
+import logging
 import pytest
 import subprocess
 import time
 
-from tests.user_helper import UserHelper
+from helpers.user_helper import UserHelper
+
+log = logging.getLogger(__name__)
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -23,21 +26,27 @@ def mock_server():
     time.sleep(2)
     # Check it started successfully
     assert not mock_proc.poll(), mock_proc.stdout.read().decode("utf-8")
+    log.info('Server started')
     yield mock_proc
     # Shut it down at the end of the pytest session
+    log.info('Terminating server')
     mock_proc.terminate()
 
 
 @pytest.fixture(scope="function")
 def new_user():
-    user = UserHelper(email=f'{time.time()}@email.com')
-    user.create_user('Qwerty1!')
-    yield user
+    email = f'{time.time()}@email.com'
+    log.info(f'Creating a new user: {email}')
+    user = UserHelper()
+    user.create_user(email, 'Qwerty1!')
+    yield email
 
 
 @pytest.fixture(scope="function")
 def new_user_with_balance():
-    user = UserHelper(email=f'{time.time()}@email.com')
-    user.create_user('Qwerty1!')
-    user.deposit_balance(100)
-    yield user
+    email = f'{time.time()}@email.com'
+    log.info(f'Creating new_user_with_balance: {email}')
+    user = UserHelper()
+    user.create_user(email, 'Qwerty1!')
+    user.deposit_balance(email, 100)
+    yield email
