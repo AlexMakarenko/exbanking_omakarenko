@@ -5,3 +5,4 @@ venv/
 .history/
 app/app.db
 allure_report/
+.DS_Store

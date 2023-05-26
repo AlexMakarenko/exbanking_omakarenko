@@ -28,16 +28,19 @@ async def generate_users(amount_of_users):
         start_time = time.time()
         responses = await asyncio.gather(*tasks)
         end_time = time.time()
-        log.info(f'Time spent: {end_time - start_time} seconds')
+        time_spent = end_time - start_time
+        log.info(f'Time spent: {time_spent} seconds')
         for response in responses:
             emails.remove(response.get('email'))
-        return emails
+        return emails, time_spent
 
 
 @allure.testcase('Load test with 100 users creating accounts.')
 def test_load_create_user(mock_server):
     loop = asyncio.get_event_loop()
-    failed_emails = loop.run_until_complete(generate_users(100))
+    failed_emails, time_spent = loop.run_until_complete(generate_users(100))
     log.error(failed_emails) if failed_emails else log.info('All emails were registered')
     with allure.step('Check all emails were registered'):
         assert not failed_emails, f'Some emails were not registered.'
+    with allure.step('Check time spent is within 2 seconds'):
+        assert time_spent <= 2
