@@ -26,6 +26,8 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
     elif not user.email:
         raise HTTPException(status_code=400, detail="Email is empty")
+    elif '@'not in user.email:
+        raise HTTPException(status_code=400, detail="Invalid email")
     elif len(user.password) < 8:
         raise HTTPException(status_code=400, detail="Minimum length of password is 8 symbols")
     return crud.create_user(db=db, user=user)
